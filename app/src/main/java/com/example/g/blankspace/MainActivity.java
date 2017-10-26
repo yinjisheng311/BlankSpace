@@ -31,10 +31,12 @@ public class MainActivity extends Activity {
     private EditText flightNumber;
     private EditText itemNumber;
     private EditText numberOfPieces;
+    private EditText lensHeight;
     private CheckBox stackable;
     private CheckBox tiltable;
 
     private String flightData;
+    private String lensHeightData;
     private String itemData;
     private String piecesData;
     private boolean stackableData;
@@ -47,12 +49,20 @@ public class MainActivity extends Activity {
         }
     };
 
+    private OnClickListener mMeasureCylindricalButtonClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startCylindricalMeasure();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         flightNumber = (EditText)findViewById(R.id.flight_id);
         itemNumber = (EditText)findViewById(R.id.item_id);
+        lensHeight = (EditText)findViewById(R.id.lens_height);
         numberOfPieces = (EditText)findViewById(R.id.number_pieces);
         stackable = (CheckBox)findViewById(R.id.stackable);
         tiltable = (CheckBox)findViewById(R.id.tiltable);
@@ -61,6 +71,7 @@ public class MainActivity extends Activity {
 //        mCameraImageView.setRotation(90);
 
         findViewById(R.id.measure_image_button).setOnClickListener(mCaptureImageButtonClickListener);
+        findViewById(R.id.measure_cylindrical_button).setOnClickListener(mMeasureCylindricalButtonClickListener);
 
     }
 
@@ -72,6 +83,23 @@ public class MainActivity extends Activity {
         tiltableData = tiltable.isChecked();
         System.out.println(flightData);
         System.out.println(tiltableData);
-        startActivityForResult(new Intent(MainActivity.this, CameraActivity.class), TAKE_PICTURE_REQUEST_B);
+        Intent it = new Intent(MainActivity.this, CameraActivity.class);
+        it.putExtra("Type", "Cuboid");
+        startActivity(it);
+    }
+    private void startCylindricalMeasure() {
+        flightData = flightNumber.getText().toString();
+        itemData = itemNumber.getText().toString();
+        piecesData = numberOfPieces.getText().toString();
+
+        stackableData = stackable.isChecked();
+        tiltableData = tiltable.isChecked();
+        System.out.println(flightData);
+        System.out.println(tiltableData);
+        Intent it = new Intent(MainActivity.this, CameraActivity.class);
+        it.putExtra("Type", "Cylindrical");
+        it.putExtra("LensHeight", lensHeight.getText().toString());
+
+        startActivity(it);
     }
 }

@@ -79,9 +79,15 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private double objectDepth;
     private double objectVolume;
 
+    private String type;
+
+    private static final String CUBOID_TYPE = "Cuboid";
+    private static final String CYLINDRICAL_TYPE = "Cylindrical";
+
     private OnClickListener mDoneButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
+
             blink(v);
             CameraActivity.counter++;
             azimuthData = azimuth;
@@ -110,28 +116,42 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                     MeasureDimension(lensHeight, pitchBottom, pitchTop, azimuthLeft, azimuthRight);
 //                    System.out.println(String.format("%.2f", objectHeight));
                     Log.d("Result ", String.valueOf(objectDistance) + " " + String.format("%.2f", objectHeight) + " " + String.format("%.2f", objectWidth));
-                    mInstruction.setText("Align with bottom of object");
-                    CameraActivity.counter = 0;
-
                     AlertDialog.Builder builder;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         builder = new AlertDialog.Builder(CameraActivity.this, android.R.style.Theme_Material_Dialog_Alert);
                     } else {
                         builder = new AlertDialog.Builder(CameraActivity.this);
                     }
-                    if (objectDepth == 0) {
-                        builder.setTitle("Action")
-                                .setMessage("Move either to the left/right side of object")
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        // continue with delete
-                                    }
-                                })
-                                .show();
-                    } else {
-                        System.out.println("vol" + objectVolume);
+
+                    if (type.equals(CUBOID_TYPE)) {
+                        mInstruction.setText("Align with bottom of object");
+                        CameraActivity.counter = 0;
+
+                        if (objectDepth == 0) {
+                            builder.setTitle("Action")
+                                    .setMessage("Move either to the left/right side of object")
+                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            // continue with delete
+                                        }
+                                    })
+                                    .show();
+                        } else {
+                            objectVolume = objectDepth * objectHeight * objectWidth;
+                            builder.setTitle("Result")
+                                    .setMessage("Height: " + String.format("%.2f", objectHeight * 100) + "cm \nWidth: " + String.format("%.2f", objectWidth * 100) + "cm \nDepth: " + String.format("%.2f", objectDepth * 100) + "cm \nVolume: " + String.format("%.2f", objectVolume * 1000000) + "cm3")
+                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            launchIntent();
+                                        }
+                                    })
+                                    .show();
+                        }
+                        break;
+                    } else if (type.equals(CYLINDRICAL_TYPE)) {
+                        objectVolume = objectHeight * Math.pow((objectWidth / 2), 2) * Math.PI;
                         builder.setTitle("Result")
-                                .setMessage("Height: " + String.format("%.2f", objectHeight*100) + "cm \n Width: " + String.format("%.2f",objectWidth*100) + "cm \n Depth: " + String.format("%.2f",objectDepth*100) + "cm \n Volume: " + String.format("%.2f",objectVolume*1000000) +"cm3")
+                                .setMessage("Height: " + String.format("%.2f", objectHeight * 100) + "cm \nWidth: " + String.format("%.2f", objectWidth * 100) + "cm \nVolume: " + String.format("%.2f", objectVolume * 1000000) + "cm3")
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         launchIntent();
@@ -139,26 +159,30 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                                 })
                                 .show();
                     }
-                    break;
                 default:
-                    mInstruction.setText("Things not working");
+                    mInstruction.setText("");
                     break;
             }
+
         }
     };
 
     private void launchIntent() {
         Intent it = new Intent(CameraActivity.this, MainActivity.class);
+        counter = 0;
         startActivity(it);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-        objectWidth = 0;
+        type = getIntent().getExtras().getString("Type");
         lensHeight = 0.115;
+        if (getIntent().getExtras().getString("LensHeight") != null) {
+            lensHeight = Double.parseDouble(getIntent().getExtras().getString("LensHeight"));
+        }
+        System.out.println(lensHeight);
+        objectWidth = 0;
         sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         setContentView(R.layout.activity_camera);
         mCameraTriangle = (ImageView) findViewById(R.id.arrow_drop_up);
@@ -242,7 +266,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
 
-    public void blink(View view){
+    public void blink(View view) {
         SurfaceView image = (SurfaceView) findViewById(R.id.preview_view);
         Animation animation1 =
                 AnimationUtils.loadAnimation(getApplicationContext(),
@@ -250,8 +274,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         image.startAnimation(animation1);
     }
 
-    public void fade(View view){
-        SurfaceView image = (SurfaceView)findViewById(R.id.preview_view);
+    public void fade(View view) {
+        SurfaceView image = (SurfaceView) findViewById(R.id.preview_view);
         Animation animation1 =
                 AnimationUtils.loadAnimation(getApplicationContext(),
                         R.anim.fade);
@@ -294,11 +318,11 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     }
 
     public double radianFromDeg(double deg) {
-        return (deg/180)*Math.PI;
+        return (deg / 180) * Math.PI;
     }
 
-    public double getOppFromTan(double angle, double adj){
-        return adj*Math.tan(radianFromDeg(angle));
+    public double getOppFromTan(double angle, double adj) {
+        return adj * Math.tan(radianFromDeg(angle));
     }
 
     public void MeasureDimension(double lensHeight, double pitchBottom, double pitchTop, double azimuthLeft, double azimuthRight) {
@@ -308,8 +332,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         this.azimuthLeft = azimuthLeft;
         this.azimuthRight = azimuthRight;
 
-        this.objectDistance = getOppFromTan(90-pitchBottom,lensHeight);
-        this.objectHeight = lensHeight - getOppFromTan(pitchTop,objectDistance);
+        this.objectDistance = getOppFromTan(90 - pitchBottom, lensHeight);
+        this.objectHeight = lensHeight - getOppFromTan(pitchTop, objectDistance);
         //this.objectDistance = lensHeight * Math.tan(((90 - pitchBottom)/180) * Math.PI);
         //this.objectHeight = lensHeight - (objectDistance * Math.tan((pitchTop / 180) * Math.PI));
 
@@ -326,11 +350,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
             a += 360;
         }
         if (this.objectWidth == 0) {
-            this.objectWidth = 2*getOppFromTan(a/2,objectDistance);
+            this.objectWidth = 2 * getOppFromTan(a / 2, objectDistance);
         } else {
-            this.objectDepth = 2*getOppFromTan(a/2,objectDistance);
-            this.objectVolume = objectDepth * objectHeight * objectWidth;
-
+            this.objectDepth = 2 * getOppFromTan(a / 2, objectDistance);
         }
         System.out.println(this.objectWidth);
         System.out.println(this.objectHeight);

@@ -83,17 +83,17 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
             switch (counter) {
                 case 1:
                     pitchBottom = pitch;
-                    mInstruction.setText("Align TOP of the object with the horizontal line");
+                    mInstruction.setText("Align with top of object");
 
                     break;
                 case 2:
                     pitchTop = pitch;
-                    mInstruction.setText("Place pointer at the BOTTOM LEFT corner of object");
+                    mInstruction.setText("Point at bottom left of object");
 
                     break;
                 case 3:
                     azimuthLeft = azimuth;
-                    mInstruction.setText("Place pointer at the BOTTOM RIGHT corner of object");
+                    mInstruction.setText("Point at bottom right of object");
 
                     break;
                 case 4:
@@ -122,7 +122,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         mCameraImage = (ImageView) findViewById(R.id.camera_image_view);
         mCameraImage.setVisibility(View.INVISIBLE);
         mInstruction = (TextView) findViewById(R.id.instruction);
-        mInstruction.setText("Align BOTTOM of the object with the horizontal line");
+        mInstruction.setText("Align with bottom of object");
 
         mCameraPreview = (SurfaceView) findViewById(R.id.preview_view);
         final SurfaceHolder surfaceHolder = mCameraPreview.getHolder();

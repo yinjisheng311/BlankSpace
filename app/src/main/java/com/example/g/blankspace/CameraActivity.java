@@ -1,5 +1,11 @@
 package com.example.g.blankspace;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,7 +13,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -16,45 +28,74 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-public class CameraActivity extends Activity implements PictureCallback, SurfaceHolder.Callback {
+public class CameraActivity extends Activity implements SurfaceHolder.Callback, SensorEventListener {
 
     public static final String EXTRA_CAMERA_DATA = "camera_data";
 
     private static final String KEY_IS_CAPTURING = "is_capturing";
 
+    private static int counter;
+
     private Camera mCamera;
     private ImageView mCameraImage;
     private ImageView mCameraTriangle;
     private SurfaceView mCameraPreview;
-    private Button mCaptureImageButton;
-    private byte[] mCameraData;
     private boolean mIsCapturing;
 
-    private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            captureImage();
-        }
-    };
+    public SensorManager sManager;
 
-    private OnClickListener mRecaptureImageButtonClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            setupImageCapture();
-        }
-    };
+    float Rot[] = null; //for gravity rotational data
+    //don't use R because android uses that for other stuff
+    float I[] = null; //for magnetic rotational data
+    float accels[] = new float[3];
+    float mags[] = new float[3];
+    float[] values = new float[3];
+
+    float azimuth;
+    float pitch;
+    float roll;
+
+    float azimuthData;
+    float pitchData;
+    float rollData;
+
+    private double lensHeight;
+    private double pitchBottom;
+    private double pitchTop;
+    private double azimuthLeft;
+    private double azimuthRight;
+
+    private double objectDistance;
+    private double objectHeight;
+    private double objectWidth;
 
     private OnClickListener mDoneButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (mCameraData != null) {
-                Intent intent = new Intent();
-                intent.putExtra(EXTRA_CAMERA_DATA, mCameraData);
-                setResult(RESULT_OK, intent);
-            } else {
-                setResult(RESULT_CANCELED);
+            CameraActivity.counter ++;
+            azimuthData = azimuth;
+            pitchData = pitch;
+            rollData = roll;
+            Log.d("Counter", String.valueOf(CameraActivity.counter));
+            Log.d("Whatever ", String.valueOf(azimuthData) + " " + String.valueOf(pitchData) + " " + String.valueOf(rollData));
+            switch(counter) {
+                case 1:
+                    pitchBottom = pitch;
+                    break;
+                case 2:
+                    pitchTop = pitch;
+                    break;
+                case 3:
+                    azimuthLeft = azimuth;
+                    break;
+                case 4:
+                    azimuthRight = azimuth;
+                    MeasureDimension(lensHeight, pitchBottom, pitchTop, azimuthLeft, azimuthRight);
+                    Log.d("Result ", String.valueOf(objectDistance) + " " + String.valueOf(objectHeight) + " " + String.valueOf(objectWidth));
+                    break;
+                default:
+                    break;
             }
-            finish();
         }
     };
 
@@ -62,6 +103,9 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        lensHeight = 1.61;
+
+        sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         setContentView(R.layout.activity_camera);
         mCameraTriangle = (ImageView) findViewById(R.id.arrow_drop_up);
         mCameraImage = (ImageView) findViewById(R.id.camera_image_view);
@@ -72,11 +116,8 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
         surfaceHolder.addCallback(this);
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-        mCaptureImageButton = (Button) findViewById(R.id.capture_image_button);
-        mCaptureImageButton.setOnClickListener(mCaptureImageButtonClickListener);
-
-        final Button doneButton = (Button) findViewById(R.id.done_button);
-        doneButton.setOnClickListener(mDoneButtonClickListener);
+        final Button nextButton = (Button) findViewById(R.id.next_button);
+        nextButton.setOnClickListener(mDoneButtonClickListener);
         mIsCapturing = true;
     }
 
@@ -90,18 +131,13 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
-        mIsCapturing = savedInstanceState.getBoolean(KEY_IS_CAPTURING, mCameraData == null);
-        if (mCameraData != null) {
-            setupImageDisplay();
-        } else {
-            setupImageCapture();
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        sManager.registerListener(this, sManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        sManager.registerListener(this, sManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
 
         if (mCamera == null) {
             try {
@@ -129,12 +165,6 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     }
 
     @Override
-    public void onPictureTaken(byte[] data, Camera camera) {
-        mCameraData = data;
-        setupImageDisplay();
-    }
-
-    @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         if (mCamera != null) {
             try {
@@ -156,27 +186,50 @@ public class CameraActivity extends Activity implements PictureCallback, Surface
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
 
-    private void captureImage() {
 
-        mCamera.takePicture(null, null, this);
+    public void onSensorChanged(SensorEvent event) {
+        switch (event.sensor.getType()) {
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                mags = event.values.clone();
+                break;
+            case Sensor.TYPE_ACCELEROMETER:
+                accels = event.values.clone();
+                break;
+        }
+
+        if (mags != null && accels != null) {
+            Rot = new float[9];
+            I = new float[9];
+            SensorManager.getRotationMatrix(Rot, I, accels, mags);
+            // Correct if screen is in Landscape
+
+            float[] outR = new float[9];
+            SensorManager.remapCoordinateSystem(Rot, SensorManager.AXIS_X, SensorManager.AXIS_Z, outR);
+            SensorManager.getOrientation(outR, values);
+
+            azimuth = values[0] * 57.2957795f; //looks like we don't need this one
+            pitch = values[1] * 57.2957795f;
+            roll = values[2] * 57.2957795f;
+            mags = null; //retrigger the loop when things are repopulated
+            accels = null; ////retrigger the loop when things are repopulated
+        }
     }
 
-    private void setupImageCapture() {
-        mCameraImage.setVisibility(View.INVISIBLE);
-        mCameraPreview.setVisibility(View.VISIBLE);
-        mCamera.startPreview();
-        mCaptureImageButton.setText(R.string.capture_image);
-        mCaptureImageButton.setOnClickListener(mCaptureImageButtonClickListener);
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 
-    private void setupImageDisplay() {
-        Bitmap bitmap = BitmapFactory.decodeByteArray(mCameraData, 0, mCameraData.length);
-        mCameraImage.setImageBitmap(bitmap);
-        mCameraImage.setRotation(90);
-        mCamera.stopPreview();
-        mCameraPreview.setVisibility(View.INVISIBLE);
-        mCameraImage.setVisibility(View.VISIBLE);
-        mCaptureImageButton.setText(R.string.recapture_image);
-        mCaptureImageButton.setOnClickListener(mRecaptureImageButtonClickListener);
-    }
+    public void MeasureDimension(double lensHeight, double pitchBottom, double pitchTop, double azimuthLeft, double azimuthRight) {
+            this.lensHeight = lensHeight;
+            this.pitchBottom = pitchBottom;
+            this.pitchTop = pitchTop;
+            this.azimuthLeft = azimuthLeft;
+            this.azimuthRight = azimuthRight;
+            this.objectDistance = lensHeight * Math.sin(pitchBottom);
+            this.objectHeight = lensHeight - (objectDistance/Math.sin(pitchTop));
+            this.objectWidth = (objectDistance*Math.tan((azimuthRight-azimuthLeft)/2))*2;
+        }
+
 }

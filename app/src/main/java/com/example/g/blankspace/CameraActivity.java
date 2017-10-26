@@ -72,13 +72,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private OnClickListener mDoneButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            CameraActivity.counter ++;
+            CameraActivity.counter++;
             azimuthData = azimuth;
             pitchData = pitch;
             rollData = roll;
             Log.d("Counter", String.valueOf(CameraActivity.counter));
             Log.d("Whatever ", String.valueOf(azimuthData) + " " + String.valueOf(pitchData) + " " + String.valueOf(rollData));
-            switch(counter) {
+            switch (counter) {
                 case 1:
                     pitchBottom = pitch;
                     break;
@@ -103,7 +103,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        lensHeight = 1.61;
+        lensHeight = 0.115;
 
         sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         setContentView(R.layout.activity_camera);
@@ -222,14 +222,26 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     }
 
     public void MeasureDimension(double lensHeight, double pitchBottom, double pitchTop, double azimuthLeft, double azimuthRight) {
-            this.lensHeight = lensHeight;
-            this.pitchBottom = pitchBottom;
-            this.pitchTop = pitchTop;
-            this.azimuthLeft = azimuthLeft;
-            this.azimuthRight = azimuthRight;
-            this.objectDistance = lensHeight * Math.sin(pitchBottom);
-            this.objectHeight = lensHeight - (objectDistance/Math.sin(pitchTop));
-            this.objectWidth = (objectDistance*Math.tan((azimuthRight-azimuthLeft)/2))*2;
+        this.lensHeight = lensHeight;
+        this.pitchBottom = pitchBottom;
+        this.pitchTop = pitchTop;
+        this.azimuthLeft = azimuthLeft;
+        this.azimuthRight = azimuthRight;
+        this.objectDistance = lensHeight * Math.tan(((90 - pitchBottom)/180) * Math.PI);
+        this.objectHeight = lensHeight - (objectDistance * Math.tan((pitchTop / 180) * Math.PI));
+        System.out.println(lensHeight);
+        System.out.println(pitchBottom);
+        System.out.println(pitchTop);
+        System.out.println(azimuthLeft);
+        System.out.println(azimuthRight);
+
+        double a = (azimuthRight - azimuthLeft);
+        if (a > 180) {
+            a -= 360;
+        } else if (a < -180) {
+            a += 360;
         }
+        this.objectWidth = (objectDistance * Math.tan(a / 2 / 180 * Math.PI)) * 2;
+    }
 
 }

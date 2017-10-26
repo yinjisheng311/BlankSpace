@@ -26,7 +26,6 @@ public class MainActivity extends Activity {
     private static final int TAKE_PICTURE_REQUEST_B = 100;
 
     private ImageView mCameraImageView;
-    private Bitmap mCameraBitmap;
 
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
         @Override

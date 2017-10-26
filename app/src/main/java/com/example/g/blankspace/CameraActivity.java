@@ -129,8 +129,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                                 })
                                 .show();
                     } else {
+                        System.out.println("vol" + objectVolume);
                         builder.setTitle("Result")
-                                .setMessage("Height: " + String.format("%.2f", objectHeight) + "m \n Width: " + String.format("%.2f",objectWidth) + "m \n Depth: " + String.format("%.2f",objectDepth) + "m \n Volume: " + String.format("%.2f",objectVolume) +"m")
+                                .setMessage("Height: " + String.format("%.2f", objectHeight*100) + "cm \n Width: " + String.format("%.2f",objectWidth*100) + "cm \n Depth: " + String.format("%.2f",objectDepth*100) + "cm \n Volume: " + String.format("%.2f",objectVolume*1000000) +"cm3")
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         launchIntent();

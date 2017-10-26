@@ -100,7 +100,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                     azimuthRight = azimuth;
                     MeasureDimension(lensHeight, pitchBottom, pitchTop, azimuthLeft, azimuthRight);
                     Log.d("Result ", String.valueOf(objectDistance) + " " + String.valueOf(objectHeight) + " " + String.valueOf(objectWidth));
-                    mInstruction.setText("The height of object is " + String.valueOf(objectHeight) + "m and width is " + String.valueOf(objectWidth) +"m");
+                    mInstruction.setText("The height of object is " + String.valueOf(objectHeight) + "m \n  width is " + String.valueOf(objectWidth) +"m");
                     CameraActivity.counter = 0;
                     break;
                 default:
@@ -114,7 +114,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        lensHeight = 0.115;
+        lensHeight = 1.61;
 
         sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         setContentView(R.layout.activity_camera);
@@ -234,15 +234,26 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
 
     }
 
+    public double radianFromDeg(double deg) {
+        return (deg/180)*Math.PI;
+    }
+
+    public double getOppFromTan(double angle, double adj){
+        return adj*Math.tan(radianFromDeg(angle));
+    }
+
     public void MeasureDimension(double lensHeight, double pitchBottom, double pitchTop, double azimuthLeft, double azimuthRight) {
         this.lensHeight = lensHeight;
         this.pitchBottom = pitchBottom;
         this.pitchTop = pitchTop;
         this.azimuthLeft = azimuthLeft;
         this.azimuthRight = azimuthRight;
-        this.objectDistance = lensHeight * Math.tan(((90 - pitchBottom)/180) * Math.PI);
-        this.objectHeight = lensHeight - (objectDistance * Math.tan((pitchTop / 180) * Math.PI));
-        System.out.println(lensHeight);
+        this.objectDistance = getOppFromTan(90-pitchBottom,lensHeight);
+        this.objectHeight = lensHeight - getOppFromTan(pitchTop,objectDistance);
+        //this.objectDistance = lensHeight * Math.tan(((90 - pitchBottom)/180) * Math.PI);
+        //this.objectHeight = lensHeight - (objectDistance * Math.tan((pitchTop / 180) * Math.PI));
+
+        System.out.println("Lens Height: " + lensHeight);
         System.out.println(pitchBottom);
         System.out.println(pitchTop);
         System.out.println(azimuthLeft);
@@ -254,7 +265,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         } else if (a < -180) {
             a += 360;
         }
-        this.objectWidth = (objectDistance * Math.tan(a / 2 / 180 * Math.PI)) * 2;
+        //this.objectWidth = (objectDistance * Math.tan(a / 2 / 180 * Math.PI)) * 2;
+        this.objectWidth = 2*getOppFromTan(a/2,objectDistance);
     }
 
 }

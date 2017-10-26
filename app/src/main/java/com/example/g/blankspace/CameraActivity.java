@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback, SensorEventListener {
@@ -39,6 +40,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private Camera mCamera;
     private ImageView mCameraImage;
     private ImageView mCameraTriangle;
+    private TextView mInstruction;
     private SurfaceView mCameraPreview;
     private boolean mIsCapturing;
 
@@ -77,23 +79,32 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
             pitchData = pitch;
             rollData = roll;
             Log.d("Counter", String.valueOf(CameraActivity.counter));
-            Log.d("Whatever ", String.valueOf(azimuthData) + " " + String.valueOf(pitchData) + " " + String.valueOf(rollData));
+            Log.d("Data ", String.valueOf(azimuthData) + " " + String.valueOf(pitchData) + " " + String.valueOf(rollData));
             switch (counter) {
                 case 1:
                     pitchBottom = pitch;
+                    mInstruction.setText("Align TOP of the object with the horizontal line");
+
                     break;
                 case 2:
                     pitchTop = pitch;
+                    mInstruction.setText("Place pointer at the BOTTOM LEFT corner of object");
+
                     break;
                 case 3:
                     azimuthLeft = azimuth;
+                    mInstruction.setText("Place pointer at the BOTTOM RIGHT corner of object");
+
                     break;
                 case 4:
                     azimuthRight = azimuth;
                     MeasureDimension(lensHeight, pitchBottom, pitchTop, azimuthLeft, azimuthRight);
                     Log.d("Result ", String.valueOf(objectDistance) + " " + String.valueOf(objectHeight) + " " + String.valueOf(objectWidth));
+                    mInstruction.setText("The height of object is " + String.valueOf(objectHeight) + "m and width is " + String.valueOf(objectWidth) +"m");
+                    CameraActivity.counter = 0;
                     break;
                 default:
+                    mInstruction.setText("Things not working");
                     break;
             }
         }
@@ -110,6 +121,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         mCameraTriangle = (ImageView) findViewById(R.id.arrow_drop_up);
         mCameraImage = (ImageView) findViewById(R.id.camera_image_view);
         mCameraImage.setVisibility(View.INVISIBLE);
+        mInstruction = (TextView) findViewById(R.id.instruction);
+        mInstruction.setText("Align BOTTOM of the object with the horizontal line");
 
         mCameraPreview = (SurfaceView) findViewById(R.id.preview_view);
         final SurfaceHolder surfaceHolder = mCameraPreview.getHolder();

@@ -16,8 +16,7 @@
         <SurfaceView
             android:id="@+id/preview_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,27 +32,42 @@
         </LinearLayout>
 
         <!--<LinearLayout-->
-            <!--android:orientation="horizontal"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="0.5"-->
-            <!--android:background="#CCFFF00"-->
-            <!--android:alpha="0.5"-->
-            <!--&gt;</LinearLayout>-->
+        <!--android:orientation="horizontal"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_weight="0.5"-->
+        <!--android:background="#CCFFF00"-->
+        <!--android:alpha="0.5"-->
+        <!--&gt;</LinearLayout>-->
 
         <!--<LinearLayout-->
-            <!--android:orientation="horizontal"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="0.5"-->
-            <!--android:background="#000000"-->
-            <!--android:alpha="0.5"-->
-            <!--&gt;</LinearLayout>-->
+        <!--android:orientation="horizontal"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_weight="0.5"-->
+        <!--android:background="#000000"-->
+        <!--android:alpha="0.5"-->
+        <!--&gt;</LinearLayout>-->
 
         <ImageView
             android:id="@+id/camera_image_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/instruction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="#FFFFFF"
+                android:background="#000000"
+                android:text="TextView" />
+        </LinearLayout>
 
     </FrameLayout>
 

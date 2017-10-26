@@ -39,9 +39,9 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mCameraImageView = (ImageView) findViewById(R.id.camera_image_view);
-        mCameraImageView.setRotation(90);
-        findViewById(R.id.capture_image_button).setOnClickListener(mCaptureImageButtonClickListener);
+//        mCameraImageView = (ImageView) findViewById(R.id.camera_image_view);
+//        mCameraImageView.setRotation(90);
+        findViewById(R.id.measure_image_button).setOnClickListener(mCaptureImageButtonClickListener);
 
     }
 

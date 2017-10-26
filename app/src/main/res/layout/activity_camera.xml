@@ -27,7 +27,20 @@
                 android:id="@+id/arrow_drop_up"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/ic_my_location_black_24dp" />
+                android:background="@drawable/ic_location_searching_black_24dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/arrow_drop_up"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/ic_add_black_24dp" />
 
         </LinearLayout>
 
@@ -39,16 +52,22 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center_horizontal">
+            android:gravity="center">
 
             <TextView
                 android:id="@+id/instruction"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="#33000000"
                 android:gravity="center"
+                android:text="TextView"
                 android:textColor="#FFFFFF"
-                android:background="#000000"
-                android:text="TextView" />
+                android:layout_marginBottom="180dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textSize="16sp"
+                android:textAllCaps="true"/>
+
         </LinearLayout>
 
     </FrameLayout>

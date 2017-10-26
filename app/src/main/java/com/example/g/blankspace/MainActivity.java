@@ -34,6 +34,12 @@ public class MainActivity extends Activity {
     private CheckBox stackable;
     private CheckBox tiltable;
 
+    private String flightData;
+    private String itemData;
+    private String piecesData;
+    private boolean stackableData;
+    private boolean tiltableData;
+
     private OnClickListener mCaptureImageButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -45,7 +51,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        flightNumber = (EditText)findViewById(R.id.)
+        flightNumber = (EditText)findViewById(R.id.flight_id);
+        itemNumber = (EditText)findViewById(R.id.item_id);
+        numberOfPieces = (EditText)findViewById(R.id.number_pieces);
+        stackable = (CheckBox)findViewById(R.id.stackable);
+        tiltable = (CheckBox)findViewById(R.id.tiltable);
+
 //        mCameraImageView = (ImageView) findViewById(R.id.camera_image_view);
 //        mCameraImageView.setRotation(90);
 
@@ -54,6 +65,13 @@ public class MainActivity extends Activity {
     }
 
     private void startImageCapture() {
+        flightData = flightNumber.getText().toString();
+        itemData = itemNumber.getText().toString();
+        piecesData = numberOfPieces.getText().toString();
+        stackableData = stackable.isChecked();
+        tiltableData = tiltable.isChecked();
+        System.out.println(flightData);
+        System.out.println(tiltableData);
         startActivityForResult(new Intent(MainActivity.this, CameraActivity.class), TAKE_PICTURE_REQUEST_B);
     }
 }

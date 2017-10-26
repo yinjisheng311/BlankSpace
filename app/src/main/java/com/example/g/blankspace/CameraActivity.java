@@ -77,6 +77,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private double objectHeight;
     private double objectWidth;
     private double objectDepth;
+    private double objectVolume;
 
     private OnClickListener mDoneButtonClickListener = new OnClickListener() {
         @Override
@@ -118,19 +119,25 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                     } else {
                         builder = new AlertDialog.Builder(CameraActivity.this);
                     }
-                    builder.setTitle("Result")
-                            .setMessage("The height of object is " + String.valueOf(objectHeight) + "m and width is " + String.valueOf(objectWidth) +"m")
-                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // continue with delete
-                                }
-                            })
-                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // do nothing
-                                }
-                            })
-                            .show();
+                    if (objectDepth == 0) {
+                        builder.setTitle("Action")
+                                .setMessage("Move either to the left/right side of object")
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // continue with delete
+                                    }
+                                })
+                                .show();
+                    } else {
+                        builder.setTitle("Result")
+                                .setMessage("Height: " + String.format("%.2f", objectHeight) + "m \n Width: " + String.format("%.2f",objectWidth) + "m \n Depth: " + String.format("%.2f",objectDepth) + "m \n Volume: " + String.format("%.2f",objectVolume) +"m")
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // continue with delete
+                                    }
+                                })
+                                .show();
+                    }
                     break;
                 default:
                     mInstruction.setText("Things not working");
@@ -145,7 +152,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
 
 
         objectWidth = 0;
-        lensHeight = 1.61;
+        lensHeight = 0.115;
         sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         setContentView(R.layout.activity_camera);
         mCameraTriangle = (ImageView) findViewById(R.id.arrow_drop_up);
@@ -316,6 +323,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
             this.objectWidth = 2*getOppFromTan(a/2,objectDistance);
         } else {
             this.objectDepth = 2*getOppFromTan(a/2,objectDistance);
+            this.objectVolume = objectDepth * objectHeight * objectWidth;
 
         }
         System.out.println(this.objectWidth);

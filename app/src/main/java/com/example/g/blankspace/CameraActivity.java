@@ -133,7 +133,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                                 .setMessage("Height: " + String.format("%.2f", objectHeight) + "m \n Width: " + String.format("%.2f",objectWidth) + "m \n Depth: " + String.format("%.2f",objectDepth) + "m \n Volume: " + String.format("%.2f",objectVolume) +"m")
                                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
-                                        // continue with delete
+                                        launchIntent();
                                     }
                                 })
                                 .show();
@@ -145,6 +145,11 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
             }
         }
     };
+
+    private void launchIntent() {
+        Intent it = new Intent(CameraActivity.this, MainActivity.class);
+        startActivity(it);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

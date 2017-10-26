@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.Locale;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +19,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -24,7 +27,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -74,6 +80,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private OnClickListener mDoneButtonClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
+            blink(v);
             CameraActivity.counter++;
             azimuthData = azimuth;
             pitchData = pitch;
@@ -83,25 +90,45 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
             switch (counter) {
                 case 1:
                     pitchBottom = pitch;
-                    mInstruction.setText("Align TOP of the object with the horizontal line");
+                    mInstruction.setText("Align with top of object");
 
                     break;
                 case 2:
                     pitchTop = pitch;
-                    mInstruction.setText("Place pointer at the BOTTOM LEFT corner of object");
+                    mInstruction.setText("Point at bottom left of object");
 
                     break;
                 case 3:
                     azimuthLeft = azimuth;
-                    mInstruction.setText("Place pointer at the BOTTOM RIGHT corner of object");
+                    mInstruction.setText("Point at bottom right of object");
 
                     break;
                 case 4:
                     azimuthRight = azimuth;
                     MeasureDimension(lensHeight, pitchBottom, pitchTop, azimuthLeft, azimuthRight);
                     Log.d("Result ", String.valueOf(objectDistance) + " " + String.valueOf(objectHeight) + " " + String.valueOf(objectWidth));
-                    mInstruction.setText("The height of object is " + String.valueOf(objectHeight) + "m \n  width is " + String.valueOf(objectWidth) +"m");
+                    mInstruction.setText("Align BOTTOM of the object with the horizontal line");
                     CameraActivity.counter = 0;
+
+                    AlertDialog.Builder builder;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        builder = new AlertDialog.Builder(CameraActivity.this, android.R.style.Theme_Material_Dialog_Alert);
+                    } else {
+                        builder = new AlertDialog.Builder(CameraActivity.this);
+                    }
+                    builder.setTitle("Result")
+                            .setMessage("The height of object is " + String.valueOf(objectHeight) + "m and width is " + String.valueOf(objectWidth) +"m")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // continue with delete
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // do nothing
+                                }
+                            })
+                            .show();
                     break;
                 default:
                     mInstruction.setText("Things not working");
@@ -122,7 +149,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         mCameraImage = (ImageView) findViewById(R.id.camera_image_view);
         mCameraImage.setVisibility(View.INVISIBLE);
         mInstruction = (TextView) findViewById(R.id.instruction);
-        mInstruction.setText("Align BOTTOM of the object with the horizontal line");
+        mInstruction.setText("Align with bottom of object");
 
         mCameraPreview = (SurfaceView) findViewById(R.id.preview_view);
         final SurfaceHolder surfaceHolder = mCameraPreview.getHolder();
@@ -197,6 +224,22 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+    }
+
+    public void blink(View view){
+        SurfaceView image = (SurfaceView) findViewById(R.id.preview_view);
+        Animation animation1 =
+                AnimationUtils.loadAnimation(getApplicationContext(),
+                        R.anim.blink);
+        image.startAnimation(animation1);
+    }
+
+    public void fade(View view){
+        SurfaceView image = (SurfaceView)findViewById(R.id.preview_view);
+        Animation animation1 =
+                AnimationUtils.loadAnimation(getApplicationContext(),
+                        R.anim.fade);
+        image.startAnimation(animation1);
     }
 
 

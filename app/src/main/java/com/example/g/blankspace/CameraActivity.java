@@ -35,6 +35,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class CameraActivity extends Activity implements SurfaceHolder.Callback, SensorEventListener {
 
     public static final String EXTRA_CAMERA_DATA = "camera_data";
@@ -42,6 +45,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private static final String KEY_IS_CAPTURING = "is_capturing";
 
     private static int counter;
+
+    private DatabaseReference database;
 
     private Camera mCamera;
     private ImageView mCameraImage;
@@ -79,7 +84,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private double objectDepth;
     private double objectVolume;
 
+
     private String type;
+    private String itemID;
+    private String flightID;
+    private boolean stackable;
+    private boolean tiltable;
+
 
     private static final String CUBOID_TYPE = "Cuboid";
     private static final String CYLINDRICAL_TYPE = "Cylindrical";
@@ -146,6 +157,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                                         }
                                     })
                                     .show();
+
+                            System.out.println(flightID);
+                            System.out.println(itemID);
+                            database.child(flightID).child(itemID).child("objectType").setValue("cuboid");
+                            database.child(flightID).child(itemID).child("tiltable").setValue(tiltable);
+                            database.child(flightID).child(itemID).child("stackable").setValue(stackable);
+                            database.child(flightID).child(itemID).child("dimensions").setValue(String.format("%.2f",objectHeight*100)+"*"+ String.format("%.2f",objectWidth*100) +"*"+ String.format("%.2f",objectDepth*100));
                         }
                         break;
                     } else if (type.equals(CYLINDRICAL_TYPE)) {
@@ -158,6 +176,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                                     }
                                 })
                                 .show();
+                        database.child(flightID).child(itemID).child("objectType").setValue("cylindrical");
+                        database.child(flightID).child(itemID).child("tiltable").setValue(tiltable);
+                        database.child(flightID).child(itemID).child("stackable").setValue(stackable);
+                        database.child(flightID).child(itemID).child("dimensions").setValue(String.format("%.2f",objectHeight*100)+","+ String.format("%.2f",objectWidth*100));
+
+
+
                     }
                 default:
                     mInstruction.setText("");
@@ -176,8 +201,16 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        database = FirebaseDatabase.getInstance().getReference();
+
         type = getIntent().getExtras().getString("Type");
-        lensHeight = 0.115;
+        itemID = getIntent().getExtras().getString("itemID");
+        flightID = getIntent().getExtras().getString("flightID");
+        stackable = getIntent().getExtras().getBoolean("stackable");
+        tiltable = getIntent().getExtras().getBoolean("tiltable");
+
+        lensHeight = 1.61;
         if (getIntent().getExtras().getString("LensHeight") != null) {
             lensHeight = Double.parseDouble(getIntent().getExtras().getString("LensHeight"));
         }

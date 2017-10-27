@@ -66,6 +66,8 @@ public class MainActivity extends Activity {
         numberOfPieces = (EditText)findViewById(R.id.number_pieces);
         stackable = (CheckBox)findViewById(R.id.stackable);
         tiltable = (CheckBox)findViewById(R.id.tiltable);
+        tiltableData = false;
+        stackableData = false;
 
 //        mCameraImageView = (ImageView) findViewById(R.id.camera_image_view);
 //        mCameraImageView.setRotation(90);
@@ -85,6 +87,11 @@ public class MainActivity extends Activity {
         System.out.println(tiltableData);
         Intent it = new Intent(MainActivity.this, CameraActivity.class);
         it.putExtra("Type", "Cuboid");
+        it.putExtra("itemID", itemData);
+        it.putExtra("flightID", flightData);
+        it.putExtra("stackable", stackableData);
+        it.putExtra("tiltable", tiltableData);
+        it.putExtra("LensHeight", lensHeight.getText().toString());
         startActivity(it);
     }
     private void startCylindricalMeasure() {
@@ -98,6 +105,10 @@ public class MainActivity extends Activity {
         System.out.println(tiltableData);
         Intent it = new Intent(MainActivity.this, CameraActivity.class);
         it.putExtra("Type", "Cylindrical");
+        it.putExtra("itemID", itemData);
+        it.putExtra("flightID", flightData);
+        it.putExtra("stackable", stackableData);
+        it.putExtra("tiltable", tiltableData);
         it.putExtra("LensHeight", lensHeight.getText().toString());
 
         startActivity(it);
